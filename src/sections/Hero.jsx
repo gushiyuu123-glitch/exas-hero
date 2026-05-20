@@ -5,6 +5,8 @@ import styles from "./Hero.module.css";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
+gsap.registerPlugin(ScrollTrigger);
+
 const NAV = [
   { label: "事業内容", href: "#business" },
   { label: "ソリューション", href: "#solution" },
@@ -30,7 +32,6 @@ const HERO = {
   bigEnA: "62%",
   bigEnB: "TRUST",
 };
-
 const TICKER_ITEMS = [
   { text: "2026年3月期 第3四半期決算説明会資料を掲載しました。", href: "#news" },
   { text: "システムメンテナンスのお知らせ（5/25 2:00〜4:00）", href: "#news" },
@@ -45,9 +46,8 @@ export default function Hero() {
   const [inView, setInView] = useState(false);
   const [reduce, setReduce] = useState(false);
 
-  // ticker
   const [tickIdx, setTickIdx] = useState(0);
-  const [tickPhase, setTickPhase] = useState("enter"); // prep | enter | leave
+  const [tickPhase, setTickPhase] = useState("enter");
   const [tickPaused, setTickPaused] = useState(false);
   const tickIntervalRef = useRef(null);
   const tickLeaveRef = useRef(null);
@@ -101,20 +101,31 @@ export default function Hero() {
   useEffect(() => {
     const items = TICKER_ITEMS;
     if (!items?.length || items.length <= 1) return;
+
+    if (tickIntervalRef.current) {
+      window.clearInterval(tickIntervalRef.current);
+      tickIntervalRef.current = null;
+    }
+    if (tickLeaveRef.current) {
+      window.clearTimeout(tickLeaveRef.current);
+      tickLeaveRef.current = null;
+    }
+
     if (tickPaused) return;
 
-    if (tickIntervalRef.current) window.clearInterval(tickIntervalRef.current);
-    if (tickLeaveRef.current) window.clearTimeout(tickLeaveRef.current);
-
-    // reduced-motion: 切替だけ
     if (reduce) {
       tickIntervalRef.current = window.setInterval(() => {
         setTickIdx((v) => (v + 1) % items.length);
       }, 6500);
-      return () => window.clearInterval(tickIntervalRef.current);
+      return () => {
+        if (tickIntervalRef.current) {
+          window.clearInterval(tickIntervalRef.current);
+          tickIntervalRef.current = null;
+        }
+      };
     }
 
-    const interval = 6500; // 速いと広告臭
+    const interval = 6500;
     const leaveMs = 240;
 
     tickIntervalRef.current = window.setInterval(() => {
@@ -128,8 +139,14 @@ export default function Hero() {
     }, interval);
 
     return () => {
-      if (tickIntervalRef.current) window.clearInterval(tickIntervalRef.current);
-      if (tickLeaveRef.current) window.clearTimeout(tickLeaveRef.current);
+      if (tickIntervalRef.current) {
+        window.clearInterval(tickIntervalRef.current);
+        tickIntervalRef.current = null;
+      }
+      if (tickLeaveRef.current) {
+        window.clearTimeout(tickLeaveRef.current);
+        tickLeaveRef.current = null;
+      }
     };
   }, [reduce, tickPaused]);
 
@@ -141,35 +158,26 @@ export default function Hero() {
   };
   const resumeTicker = () => setTickPaused(false);
 
-  /* -------------------------------
-     GSAP: 初期状態（フラッシュ防止）
-     bgを「少し寄り」から開始 → 像が整って入る
-  -------------------------------- */
   useLayoutEffect(() => {
     if (prefersReduce()) return;
 
     const el = rootRef.current;
     if (!el) return;
 
-    gsap.registerPlugin(ScrollTrigger);
-
     const ctx = gsap.context(() => {
       const q = gsap.utils.selector(el);
 
-      const bg = q(`.${styles.bg}`);
-      const veil = q(`.${styles.veil}`);
-      const read = q(`.${styles.read}`);
-      const depth = q(`.${styles.depth}`);
+      const bg     = q(`.${styles.bg}`);
+      const veil   = q(`.${styles.veil}`);
+      const read   = q(`.${styles.read}`);
+      const depth  = q(`.${styles.depth}`);
 
       const titleLines = q(`.${styles.titleLine}`);
-      const lead = q(`.${styles.lead}`);
-      const scope = q(`.${styles.scope}`);
+      const lead       = q(`.${styles.lead}`);
+      const scope      = q(`.${styles.scope}`);
 
-      // 画像：フェード + 微ズーム（アップ）
       gsap.set(bg, { opacity: 0, scale: 1.08, y: 8, transformOrigin: "50% 50%" });
       gsap.set([veil, read, depth], { opacity: 0 });
-
-      // 文字：下から上品に
       gsap.set(titleLines, { opacity: 0, y: 28 });
       gsap.set([lead, scope], { opacity: 0, y: 12 });
     }, el);
@@ -177,10 +185,6 @@ export default function Hero() {
     return () => ctx.revert();
   }, []);
 
-  /* -------------------------------
-     GSAP: ヒーロー入場
-     画像→文字 の順で、上品に一体化
-  -------------------------------- */
   useLayoutEffect(() => {
     if (prefersReduce()) return;
     if (!inView) return;
@@ -188,28 +192,24 @@ export default function Hero() {
     const el = rootRef.current;
     if (!el) return;
 
-    gsap.registerPlugin(ScrollTrigger);
-
     const ctx = gsap.context(() => {
       const q = gsap.utils.selector(el);
 
-      const bg = q(`.${styles.bg}`);
-      const veil = q(`.${styles.veil}`);
-      const read = q(`.${styles.read}`);
-      const depth = q(`.${styles.depth}`);
+      const bg     = q(`.${styles.bg}`);
+      const veil   = q(`.${styles.veil}`);
+      const read   = q(`.${styles.read}`);
+      const depth  = q(`.${styles.depth}`);
 
       const titleLines = q(`.${styles.titleLine}`);
-      const lead = q(`.${styles.lead}`);
-      const scope = q(`.${styles.scope}`);
+      const lead       = q(`.${styles.lead}`);
+      const scope      = q(`.${styles.scope}`);
 
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
-      // 画像を先に“像が整う”
-      tl.to(veil, { opacity: 0.90, duration: 0.95, ease: "power2.out" }, 0)
-        .to(read, { opacity: 0.82, duration: 0.95, ease: "power2.out" }, 0)
-        .to(depth, { opacity: 0.86, duration: 0.95, ease: "power2.out" }, 0)
+      tl.to(veil,  { opacity: 0.90, duration: 0.95, ease: "power2.out" }, 0)
+        .to(read,  { opacity: 0.88, duration: 0.95, ease: "power2.out" }, 0)
+        .to(depth, { opacity: 0.84, duration: 0.95, ease: "power2.out" }, 0)
         .to(bg, { opacity: 0.985, scale: 1.02, y: 0, duration: 1.10, ease: "power2.out" }, 0)
-        // 大きい文字：下からフェードイン
         .to(
           titleLines,
           { opacity: 1, y: 0, duration: 0.78, stagger: 0.10 },
@@ -225,27 +225,21 @@ export default function Hero() {
     return () => ctx.revert();
   }, [inView]);
 
-  /* -------------------------------
-     ScrollTrigger: 画像の“引き” + 多層の奥行き（微差）
-     ※酔わない量だけ
-  -------------------------------- */
   useLayoutEffect(() => {
     if (prefersReduce()) return;
 
     const el = rootRef.current;
     if (!el) return;
 
-    gsap.registerPlugin(ScrollTrigger);
-
     const ctx = gsap.context(() => {
       const q = gsap.utils.selector(el);
-      const bg = q(`.${styles.bg}`);
-      const veil = q(`.${styles.veil}`);
-      const read = q(`.${styles.read}`);
+
+      const bg    = q(`.${styles.bg}`);
+      const veil  = q(`.${styles.veil}`);
+      const read  = q(`.${styles.read}`);
       const depth = q(`.${styles.depth}`);
       const bigEn = q(`.${styles.bigEn}`);
 
-      // アップ → すこし引き（スクロールで戻る）
       gsap.to(bg, {
         scale: 1.0,
         y: -8,
@@ -258,7 +252,6 @@ export default function Hero() {
         },
       });
 
-      // 膜は少し薄くなっていく（写真を返す）
       gsap.to(veil, {
         opacity: 0.70,
         ease: "none",
@@ -281,7 +274,6 @@ export default function Hero() {
         },
       });
 
-      // depthは“浮遊”だけ
       gsap.to(depth, {
         y: -18,
         opacity: 0.95,
@@ -317,19 +309,16 @@ export default function Hero() {
       style={{ "--hero": `url("${HERO.bg}")` }}
       aria-label="EXAS ヒーロー"
     >
-      {/* bg layers */}
-      <div className={styles.bg} aria-hidden="true" />
-      <div className={styles.veil} aria-hidden="true" />
+      <div className={styles.bg}    aria-hidden="true" />
+      <div className={styles.veil}  aria-hidden="true" />
       <div className={styles.depth} aria-hidden="true" />
-      <div className={styles.read} aria-hidden="true" />
+      <div className={styles.read}  aria-hidden="true" />
 
-      {/* big object */}
       <div className={styles.bigEn} aria-hidden="true">
         <span className={styles.bigEnA}>{HERO.bigEnA}</span>
         <span className={styles.bigEnB}>{HERO.bigEnB}</span>
       </div>
 
-      {/* header */}
       <header className={styles.header} data-hero-header="1">
         <div
           className={styles.ticker}
@@ -387,9 +376,7 @@ export default function Hero() {
               <a className={`${styles.langLink} ${styles.langActive}`} href="#top">
                 JP
               </a>
-              <span className={styles.langSep} aria-hidden="true">
-                /
-              </span>
+              <span className={styles.langSep} aria-hidden="true">/</span>
               <a className={styles.langLink} href="#top">
                 EN
               </a>
@@ -412,7 +399,6 @@ export default function Hero() {
         </div>
       </header>
 
-      {/* content */}
       <div className={styles.wrap}>
         <div className={styles.left}>
           <div className={styles.copyStage}>

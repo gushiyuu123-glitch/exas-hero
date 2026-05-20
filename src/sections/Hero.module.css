@@ -1,39 +1,61 @@
-/* src/sections/Hero.module.css */
+/* src/sections/Hero.module.css
+   Premium Corporate (Blue x White) — blue is "edge + reflection", not "fill"
+*/
 @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;600;700&display=swap");
 
+/* ================================
+   TOKEN
+================================ */
 .section {
   position: relative;
   min-height: 100vh;
   min-height: 100svh;
   overflow: clip;
 
+  /* main palette（色を“上品に弱く”） */
+  --blue: #2f6fe6;        /* 爽やか、でも濃すぎない */
+  --blue-dark: #255fcc;   /* hover/active */
+  --blue-ink: #0a1a33;    /* 黒じゃない紺 */
+  --ink: #0e1a2e;         /* 見出し用インク */
+  --text: #0f172a;        /* 本文（黒寄りの紺） */
+  --text-mid: rgba(14, 26, 46, 0.66);
+
+  /* “未来感”はシアンを面で使わない（反射だけ） */
+  --accent: #74e6ff;
+
   --dur: 660ms;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 
+  /* glass strength（ここだけで明暗調整できる） */
+  --glass: 0.86;
+  --glass-ticker: 0.92;
+
   font-family: "IBM Plex Sans JP", system-ui, -apple-system, "Hiragino Sans",
     "Yu Gothic", "Meiryo", sans-serif;
+  color-scheme: light;
 }
 
 /* ================================
-   bg：写真の“現場感”を戻す（粒子＋端落ち＋わずかに締める）
+   bg：色を落ち着かせて“上質”
 ================================ */
 .bg {
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: var(--hero) center / cover no-repeat;
 
-  /* “綺麗すぎ”を殺して、少しだけドキュメント寄りに */
+  background: var(--hero) center / cover no-repeat;
   transform: scale(1.015);
-  filter: saturate(0.94) contrast(1.04) brightness(0.90) grayscale(0.015);
-  opacity: 0.992;
+
+  /* 色が強い問題：彩度を落として、明度は潰さない */
+  filter: saturate(0.86) contrast(1.02) brightness(0.98);
+  opacity: 0.994;
 
   will-change: transform, opacity;
   transform-origin: 50% 50%;
   pointer-events: none;
 }
 
-/* 端落ち（締まり） */
+/* 端落ち：黒で締めない（薄い締まりだけ） */
 .bg::before {
   content: "";
   position: absolute;
@@ -41,17 +63,16 @@
   pointer-events: none;
 
   background:
-    radial-gradient(1200px 760px at 74% 46%,
-      rgba(0,0,0,0) 0%,
-      rgba(0,0,0,0.10) 58%,
-      rgba(0,0,0,0.22) 100%),
+    radial-gradient(1100px 700px at 72% 44%,
+      transparent 0%,
+      rgba(0, 0, 0, 0.05) 58%,
+      rgba(0, 0, 0, 0.12) 100%),
     linear-gradient(180deg,
-      rgba(0,0,0,0.12) 0%,
-      rgba(0,0,0,0.00) 38%);
-  opacity: 0.92;
+      rgba(0, 0, 0, 0.05) 0%,
+      transparent 36%);
 }
 
-/* 粒子（SVGノイズ：CSSだけで“空気”を作る） */
+/* 粒子：清潔感を壊さない量（AIのツルツルだけ消す） */
 .bg::after {
   content: "";
   position: absolute;
@@ -61,17 +82,15 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
   background-size: 240px 240px;
 
-  opacity: 0.055; /* ここが“仕事感”の量。上げすぎ厳禁 */
+  opacity: 0.030;
   mix-blend-mode: overlay;
 }
-
-/* mix-blend が効かない環境は“ただ薄い粒子”として残す */
 @supports not (mix-blend-mode: overlay) {
-  .bg::after { opacity: 0.035; }
+  .bg::after { opacity: 0.020; }
 }
 
 /* ================================
-   veil：中央→右の膜（薄い “反射” として流す）
+   veil：中央→右の“青い反射”（塗らない）
 ================================ */
 .veil {
   position: absolute;
@@ -80,57 +99,48 @@
   pointer-events: none;
 
   background:
-    /* 横：中央から右に“流れる” */
     linear-gradient(
       90deg,
       transparent 0%,
-      transparent 57%,
-      rgba(0, 30, 60, 0.070) 68%,
-      rgba(0, 30, 60, 0.035) 82%,
+      transparent 54%,
+      rgba(15, 50, 120, 0.040) 68%,
+      rgba(15, 50, 120, 0.020) 84%,
       transparent 100%
     ),
-    /* 縦：上だけうっすら（ベタ塗り回避） */
     linear-gradient(
       180deg,
-      rgba(0, 20, 40, 0.12) 0%,
-      rgba(0, 20, 40, 0.05) 22%,
-      rgba(0, 20, 40, 0) 44%
-    ),
-    /* 反射：右上の“薄い光” */
-    radial-gradient(880px 520px at 84% 18%,
-      rgba(255,255,255,0.09) 0%,
-      rgba(255,255,255,0.04) 38%,
-      transparent 70%);
+      rgba(15, 50, 120, 0.06) 0%,
+      transparent 40%
+    );
 
   opacity: 0.86;
-  will-change: opacity, transform;
+  will-change: opacity;
 }
 
 /* ================================
-   depth：迫力の“多層”＝光膜じゃなく空気の段差
+   depth：青・シアンは“薄い反射”だけ
 ================================ */
-.depth{
+.depth {
   position: absolute;
   inset: 0;
   z-index: 2;
   pointer-events: none;
 
   background:
-    radial-gradient(980px 560px at 78% 44%,
-      rgba(255,255,255,0.075) 0%,
-      rgba(255,255,255,0.030) 42%,
-      transparent 74%),
-    radial-gradient(760px 520px at 18% 78%,
-      rgba(64,214,255,0.045) 0%,
-      transparent 66%);
+    radial-gradient(900px 520px at 80% 18%,
+      rgba(47, 111, 230, 0.045) 0%,
+      rgba(47, 111, 230, 0.018) 52%,
+      transparent 76%),
+    radial-gradient(720px 500px at 18% 82%,
+      rgba(116, 230, 255, 0.035) 0%,
+      transparent 62%);
 
   opacity: 0.84;
-  transform: translateY(0);
   will-change: opacity, transform;
 }
 
 /* ================================
-   read：左の可読帯（白モヤを左寄せ＋上だけ薄い影）
+   read：左の白モヤ（維持）
 ================================ */
 .read {
   position: absolute;
@@ -141,22 +151,24 @@
   background:
     linear-gradient(
       90deg,
-      rgba(255,255,255,0.86) 0%,
-      rgba(255,255,255,0.68) 26%,
-      rgba(255,255,255,0.14) 46%,
-      rgba(255,255,255,0) 60%
+      rgba(255, 255, 255, 0.92) 0%,
+      rgba(255, 255, 255, 0.76) 24%,
+      rgba(255, 255, 255, 0.22) 44%,
+      rgba(255, 255, 255, 0) 58%
     ),
     linear-gradient(
       180deg,
-      rgba(0,0,0,0.06) 0%,
-      rgba(0,0,0,0.00) 34%
+      rgba(255, 255, 255, 0.06) 0%,
+      transparent 30%
     );
 
-  opacity: 0.84;
-  will-change: opacity, transform;
+  opacity: 0.88;
+  will-change: opacity;
 }
 
-/* big object */
+/* ================================
+   BIG OBJECT（濃くしない）
+================================ */
 .bigEn {
   position: absolute;
   left: 0;
@@ -174,26 +186,30 @@
   mask-image: linear-gradient(180deg, #000 0 76%, transparent 100%);
   will-change: transform;
 }
+
 .bigEnA {
   display: block;
   line-height: 0.88;
   letter-spacing: -0.02em;
   font-weight: 800;
   font-size: clamp(96px, 12vw, 220px);
-  color: rgba(8, 14, 22, 0.075);
+  color: rgba(10, 26, 51, 0.050); /* 濃くしない */
   transform: translateX(-0.02em);
 }
+
 .bigEnB {
   display: block;
   line-height: 0.92;
   letter-spacing: 0.02em;
   font-weight: 700;
   font-size: clamp(42px, 4.6vw, 86px);
-  color: rgba(64, 214, 255, 0.095);
+  color: rgba(47, 111, 230, 0.085); /* 霧レベル */
   transform: translateX(-0.01em);
 }
 
-/* header */
+/* ================================
+   HEADER
+================================ */
 .header {
   position: absolute;
   inset: 0 0 auto 0;
@@ -201,42 +217,45 @@
   padding-top: env(safe-area-inset-top, 0px);
 }
 
-/* ticker */
+/* ticker：青ベタを捨てて、上質に */
 .ticker {
   width: min(1840px, 100%);
   margin: 0 auto;
-  padding: 10px clamp(18px, 3.8vw, 84px);
+  padding: 8px clamp(18px, 3.8vw, 84px);
   display: flex;
   align-items: center;
   gap: 12px;
 
-  border-bottom: 1px solid rgba(10, 18, 28, 0.14);
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, var(--glass-ticker));
+  border-bottom: 1px solid rgba(47, 111, 230, 0.14);
 
-  -webkit-backdrop-filter: blur(8px) saturate(1.06);
-  backdrop-filter: blur(8px) saturate(1.06);
+  -webkit-backdrop-filter: blur(10px) saturate(1.05);
+  backdrop-filter: blur(10px) saturate(1.05);
 }
 
+/* NEWS：面で塗らない。縁と線で出す */
 .tickerLabel {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.12em;
-  color: rgba(10, 18, 28, 0.82);
-  padding: 4px 8px;
+
+  color: rgba(10, 26, 51, 0.82);
+  padding: 3px 8px;
   border-radius: 6px;
-  border: 1px solid rgba(10, 18, 28, 0.12);
-  background: rgba(255, 255, 255, 0.14);
+
+  border: 1px solid rgba(47, 111, 230, 0.18);
+  background: rgba(47, 111, 230, 0.06);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.70) inset;
+
   flex: 0 0 auto;
 }
 
 .tickerText {
   flex: 1 1 auto;
   min-width: 0;
-
   font-size: 12px;
   letter-spacing: 0.04em;
-  color: rgba(10, 18, 28, 0.74);
-
+  color: var(--text-mid);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -247,153 +266,208 @@
   min-width: 0;
   color: inherit;
   text-decoration: none;
-
   will-change: transform, opacity;
-  transition: opacity 420ms var(--ease), transform 420ms var(--ease);
+  transition: opacity 420ms var(--ease), transform 420ms var(--ease), color 200ms ease;
 }
-.tickerMsg:hover { text-decoration: underline; text-underline-offset: 3px; }
+.tickerMsg:hover {
+  color: rgba(47, 111, 230, 0.92);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(47, 111, 230, 0.34);
+}
 
-.msgPrep { opacity: 0; transform: translateX(18px); }
+.msgPrep  { opacity: 0; transform: translateX(18px); }
 .msgEnter { opacity: 1; transform: translateX(0); }
 .msgLeave { opacity: 0; transform: translateX(-18px); transition-duration: 240ms; }
 
-/* headerInner */
+/* headerInner：太い青ボーダーを捨てる（上質） */
 .headerInner {
   width: min(1840px, 100%);
   margin: 0 auto;
-  padding: 14px clamp(18px, 3.8vw, 84px);
+  padding: 0 clamp(18px, 3.8vw, 84px);
 
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: clamp(18px, 2.4vw, 44px);
 
-  border-bottom: 1px solid rgba(10, 18, 28, 0.14);
-  background: rgba(255, 255, 255, 0.14);
+  height: 58px;
 
-  -webkit-backdrop-filter: blur(9px) saturate(1.06);
-  backdrop-filter: blur(9px) saturate(1.06);
+  background: rgba(255, 255, 255, var(--glass));
+  border-bottom: 1px solid rgba(47, 111, 230, 0.18);
+
+  -webkit-backdrop-filter: blur(12px) saturate(1.05);
+  backdrop-filter: blur(12px) saturate(1.05);
+
+  position: relative;
 }
 
-.logo { display: inline-flex; align-items: center; text-decoration: none; }
+/* 未来感の署名：上端に“ごく薄い”青〜シアンライン */
+.headerInner::after{
+  content:"";
+  position:absolute;
+  left:0; right:0; top:0;
+  height: 1px;
+  pointer-events:none;
+  background: linear-gradient(90deg,
+    rgba(47,111,230,0.00) 0%,
+    rgba(47,111,230,0.24) 34%,
+    rgba(116,230,255,0.18) 56%,
+    rgba(47,111,230,0.22) 76%,
+    rgba(47,111,230,0.00) 100%);
+  opacity: 0.86;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
 .logoSvg {
   display: block;
   width: clamp(104px, 9.6vw, 148px);
   height: auto;
   opacity: 0.98;
-  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.08));
 }
 
-/* nav */
+/* nav：インクで読む。青は下線だけ */
 .nav {
   display: flex;
   justify-content: center;
   gap: clamp(18px, 2.4vw, 34px);
   width: 100%;
+  height: 100%;
 }
+
 .navLink {
   position: relative;
   text-decoration: none;
-  color: rgba(10, 18, 28, 0.78);
-  font-size: 15px;
+
+  color: rgba(10, 26, 51, 0.74);
+  font-size: 14px;
   letter-spacing: 0.06em;
-  padding: 16px 2px;
+
+  padding: 0 4px;
+  height: 100%;
+  display: flex;
+  align-items: center;
   white-space: nowrap;
-  transition: color 220ms ease;
+
+  transition: color 200ms ease;
 }
-.navLink:hover { color: rgba(10, 18, 28, 0.94); }
+.navLink:hover { color: rgba(10, 26, 51, 0.94); }
+
 .navLink::after {
   content: "";
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 9px;
-  height: 1px;
+  bottom: 10px;
+  height: 2px;
+
+  background: linear-gradient(90deg,
+    rgba(47,111,230,0.62) 0%,
+    rgba(116,230,255,0.38) 55%,
+    rgba(47,111,230,0.56) 100%);
+
   opacity: 0;
-  background: rgba(10, 18, 28, 0.26);
   transform: scaleX(0.35);
   transform-origin: left;
-  transition: transform 280ms var(--ease), opacity 200ms ease;
+  transition: transform 260ms var(--ease), opacity 200ms ease;
 }
+
 .navLink:hover::after { opacity: 1; transform: scaleX(1); }
+.navLink:focus-visible {
+  outline: 2px solid rgba(47, 111, 230, 0.45);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
 
 /* util */
-.util{
+.util {
   display: inline-flex;
   align-items: center;
   gap: 14px;
   justify-self: end;
 }
 
-.lang{
+.lang {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
-.langLink{
+.langLink {
   text-decoration: none;
   font-size: 12px;
   letter-spacing: 0.10em;
-  color: rgba(10, 18, 28, 0.62);
+  color: rgba(10, 26, 51, 0.52);
+  transition: color 200ms ease;
 }
-.langActive{ color: rgba(10, 18, 28, 0.92); font-weight: 700; }
-.langSep{ color: rgba(10, 18, 28, 0.34); }
+.langLink:hover { color: rgba(47,111,230,0.92); }
+.langActive { color: rgba(10, 26, 51, 0.86); font-weight: 700; }
+.langSep { color: rgba(10, 26, 51, 0.28); font-size: 11px; }
 
-/* CTA */
+/* CTA：青ベタをやめて“白板＋青縁” → 上質 */
 .headerCta {
   text-decoration: none;
-  color: rgba(10, 18, 28, 0.94);
   font-size: 13px;
   letter-spacing: 0.06em;
-  padding: 11px 14px;
+  font-weight: 600;
 
-  border-radius: 8px;
-  border: 1px solid rgba(10, 18, 28, 0.22);
-  background: rgba(255, 255, 255, 0.62);
+  padding: 9px 14px;
+  border-radius: 10px;
+
+  color: rgba(10, 26, 51, 0.88);
+  background: rgba(255, 255, 255, 0.80);
+  border: 1px solid rgba(47, 111, 230, 0.26);
+
   box-shadow:
-    0 12px 26px rgba(0,0,0,0.12),
-    0 1px 0 rgba(255,255,255,0.65) inset;
+    0 14px 30px rgba(10, 26, 51, 0.10),
+    0 1px 0 rgba(255, 255, 255, 0.70) inset;
 
   white-space: nowrap;
-  transition: border-color 220ms ease, background 220ms ease, box-shadow 220ms ease;
+  transition: background 200ms ease, border-color 200ms ease, color 200ms ease, transform 200ms var(--ease);
 }
 .headerCta:hover {
-  border-color: rgba(10, 18, 28, 0.28);
-  background: rgba(255, 255, 255, 0.70);
-  box-shadow:
-    0 14px 30px rgba(0,0,0,0.14),
-    0 1px 0 rgba(255,255,255,0.70) inset;
+  transform: translateY(-1px);
+  background: rgba(47, 111, 230, 0.92);
+  border-color: rgba(47, 111, 230, 0.34);
+  color: rgba(255,255,255,0.96);
 }
 
-/* menu：PCでは消す。SPだけ */
-.menuBtn{
+/* menu（SPのみ） */
+.menuBtn {
   display: none;
-  width: 42px;
-  height: 42px;
-  border-radius: 8px;
-  border: 1px solid rgba(10, 18, 28, 0.18);
-  background: rgba(255, 255, 255, 0.40);
-  box-shadow: 0 10px 22px rgba(0,0,0,0.10);
-
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid rgba(10, 26, 51, 0.16);
+  background: rgba(255, 255, 255, 0.80);
   align-items: center;
   justify-content: center;
+  flex-direction: column;
   gap: 4px;
   cursor: pointer;
 }
-.menuBar{
+.menuBar {
   display: block;
   width: 16px;
-  height: 1px;
-  background: rgba(10, 18, 28, 0.70);
+  height: 1.5px;
+  background: rgba(10, 26, 51, 0.76);
 }
 
-/* content */
+/* ================================
+   CONTENT
+================================ */
 .wrap {
   position: relative;
   z-index: 20;
   width: min(1720px, 100%);
   margin: 0 auto;
-  padding: calc(env(safe-area-inset-top, 0px) + 172px) clamp(16px, 3.2vw, 64px) 72px;
+
+  padding: calc(env(safe-area-inset-top, 0px) + 172px)
+    clamp(16px, 3.2vw, 64px) 72px;
+
   min-height: 100vh;
   min-height: 100svh;
   display: grid;
@@ -405,8 +479,10 @@
 .copyStage {
   position: relative;
   padding-left: 18px;
-  color: rgba(8, 14, 22, 0.92);
+  color: var(--text);
 }
+
+/* 縦線：青の“細い署名” */
 .copyStage::before {
   content: "";
   position: absolute;
@@ -414,90 +490,113 @@
   top: 6px;
   bottom: 6px;
   width: 1px;
-  background: rgba(64, 214, 255, 0.55);
-  opacity: 0.9;
+  background: linear-gradient(180deg,
+    rgba(47,111,230,0.18) 0%,
+    rgba(47,111,230,0.72) 28%,
+    rgba(116,230,255,0.44) 55%,
+    rgba(47,111,230,0.62) 78%,
+    rgba(47,111,230,0.16) 100%);
+  opacity: 0.90;
 }
 
 .statement { position: relative; }
 .meta { margin-top: clamp(18px, 4.6vh, 50px); }
 
-.kickerRow { display: flex; align-items: baseline; gap: 18px; }
+/* kicker */
+.kickerRow { display: flex; align-items: baseline; gap: 16px; }
+
 .kicker {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  font-size: 12px;
+  font-size: 11px;
   letter-spacing: 0.16em;
   font-weight: 700;
-  color: rgba(8, 14, 22, 0.60);
+  color: rgba(47, 111, 230, 0.86);
   text-transform: uppercase;
 }
 .kicker::before {
   content: "";
-  width: 16px;
-  height: 1px;
-  background: rgba(64, 214, 255, 0.72);
+  width: 14px;
+  height: 1.5px;
+  background: rgba(47, 111, 230, 0.82);
   flex-shrink: 0;
 }
 .kickerSub {
   font-size: 11px;
   letter-spacing: 0.14em;
   font-weight: 600;
-  color: rgba(8, 14, 22, 0.36);
+  color: rgba(10, 26, 51, 0.38);
   text-transform: uppercase;
 }
 
+/* title */
 .title {
-  margin: 14px 0 0;
+  margin: 12px 0 0;
   font-weight: 600;
   letter-spacing: 0.01em;
-  line-height: 1.18;
+  line-height: 1.20;
   font-size: clamp(36px, 4.2vw, 66px);
+  color: var(--blue-ink);
 }
 .titleLine { display: block; } /* GSAPで制御 */
 
+/* lead */
 .lead {
   margin: 0;
   font-size: clamp(15px, 1.28vw, 17px);
   line-height: 2.0;
-  color: rgba(8, 14, 22, 0.66);
+  color: rgba(10, 26, 51, 0.62);
   max-width: 46ch;
 }
+
+/* scope */
 .scope {
   margin-top: 14px;
   font-size: 12px;
   letter-spacing: 0.06em;
-  color: rgba(8, 14, 22, 0.46);
+  color: rgba(10, 26, 51, 0.44);
 }
 
-/* focus */
+/* ================================
+   FOCUS
+================================ */
 .logo:focus-visible,
 .navLink:focus-visible,
 .headerCta:focus-visible,
 .tickerMsg:focus-visible,
 .langLink:focus-visible,
 .menuBtn:focus-visible {
-  outline: 2px solid rgba(64, 214, 255, 0.60);
+  outline: 2px solid rgba(47, 111, 230, 0.50);
   outline-offset: 3px;
   border-radius: 10px;
 }
 
-/* headerの出現（上品に） */
+/* ================================
+   HEADER REVEAL
+================================ */
 .section :is(.ticker, .headerInner) {
   opacity: 0;
   transform: translateY(-10px);
   transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
 }
-.section .ticker { transition-delay: 10ms; }
+.section .ticker      { transition-delay: 10ms; }
 .section .headerInner { transition-delay: 40ms; }
-.in :is(.ticker, .headerInner) { opacity: 1; transform: translateY(0); }
 
-/* responsive */
+.in :is(.ticker, .headerInner) {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ================================
+   RESPONSIVE
+================================ */
 @media (max-width: 980px) {
   .nav { display: none; }
   .menuBtn { display: inline-flex; }
   .tickerText { max-width: 66vw; }
 }
+
 @media (max-width: 760px) {
   .kickerRow { flex-direction: column; gap: 4px; }
   .kickerSub { display: none; }
@@ -506,7 +605,9 @@
   .lang { display: none; }
 }
 
-/* reduced motion */
+/* ================================
+   REDUCED MOTION
+================================ */
 @media (prefers-reduced-motion: reduce) {
   .section :is(.ticker, .headerInner) {
     transition: none !important;
