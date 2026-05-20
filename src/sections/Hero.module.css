@@ -26,6 +26,9 @@
   filter: saturate(0.96) contrast(0.98) brightness(0.92) grayscale(0.02);
   opacity: 0.985;
 
+  will-change: transform, opacity;
+  transform-origin: 50% 50%;
+
   pointer-events: none;
 }
 
@@ -35,6 +38,7 @@
   inset: 0;
   z-index: 2;
   pointer-events: none;
+
   background:
     linear-gradient(
       90deg,
@@ -50,7 +54,9 @@
       rgba(0, 20, 40, 0.06) 24%,
       rgba(0, 20, 40, 0) 42%
     );
-  opacity: 0.92; /* 全体の濃度を落とす */
+
+  opacity: 0.90;
+  will-change: opacity, transform;
 }
 
 /* depth：迫力の“多層”用（かなり薄い光膜） */
@@ -68,11 +74,13 @@
     radial-gradient(720px 420px at 18% 70%,
       rgba(64,214,255,0.06) 0%,
       transparent 62%);
+
   opacity: 0.86;
   transform: translateY(0);
+  will-change: opacity, transform;
 }
 
-/* read：左の可読帯（靄を減らす） */
+/* read：左の可読帯（靄を少し減らす） */
 .read {
   position: absolute;
   inset: 0;
@@ -81,12 +89,14 @@
 
   background: linear-gradient(
     90deg,
-    rgba(255, 255, 255, 0.84) 0%,
-    rgba(255, 255, 255, 0.68) 30%,
+    rgba(255, 255, 255, 0.82) 0%,
+    rgba(255, 255, 255, 0.66) 30%,
     rgba(255, 255, 255, 0.14) 52%,
     rgba(255, 255, 255, 0) 64%
   );
-  opacity: 0.86;
+
+  opacity: 0.82;
+  will-change: opacity, transform;
 }
 
 /* big object */
@@ -102,8 +112,10 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+
   -webkit-mask-image: linear-gradient(180deg, #000 0 76%, transparent 100%);
   mask-image: linear-gradient(180deg, #000 0 76%, transparent 100%);
+  will-change: transform;
 }
 .bigEnA {
   display: block;
@@ -143,6 +155,7 @@
 
   border-bottom: 1px solid rgba(10, 18, 28, 0.10);
   background: rgba(255, 255, 255, 0.20);
+
   -webkit-backdrop-filter: blur(9px) saturate(1.05);
   backdrop-filter: blur(9px) saturate(1.05);
 }
@@ -224,7 +237,7 @@
 .navLink {
   position: relative;
   text-decoration: none;
-  color: rgba(10, 18, 28, 0.78); /* 少し濃く */
+  color: rgba(10, 18, 28, 0.78);
   font-size: 15px;
   letter-spacing: 0.06em;
   padding: 16px 2px;
@@ -269,7 +282,7 @@
 .langActive{ color: rgba(10, 18, 28, 0.92); font-weight: 700; }
 .langSep{ color: rgba(10, 18, 28, 0.34); }
 
-/* CTA：可読性を上げる（背景厚み＋影＋境界） */
+/* CTA */
 .headerCta {
   text-decoration: none;
   color: rgba(10, 18, 28, 0.92);

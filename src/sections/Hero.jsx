@@ -37,6 +37,9 @@ const TICKER_ITEMS = [
   { text: "導入事例を1件追加しました。", href: "#case" },
 ];
 
+const prefersReduce = () =>
+  window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+
 export default function Hero() {
   const rootRef = useRef(null);
   const [inView, setInView] = useState(false);
@@ -50,7 +53,7 @@ export default function Hero() {
   const tickLeaveRef = useRef(null);
 
   useEffect(() => {
-    const r = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    const r = prefersReduce();
     setReduce(!!r);
 
     if (r) {
@@ -103,6 +106,7 @@ export default function Hero() {
     if (tickIntervalRef.current) window.clearInterval(tickIntervalRef.current);
     if (tickLeaveRef.current) window.clearTimeout(tickLeaveRef.current);
 
+    // reduced-motion: 切替だけ
     if (reduce) {
       tickIntervalRef.current = window.setInterval(() => {
         setTickIdx((v) => (v + 1) % items.length);
@@ -110,7 +114,7 @@ export default function Hero() {
       return () => window.clearInterval(tickIntervalRef.current);
     }
 
-    const interval = 6500;
+    const interval = 6500; // 速いと広告臭
     const leaveMs = 240;
 
     tickIntervalRef.current = window.setInterval(() => {
@@ -139,9 +143,11 @@ export default function Hero() {
 
   /* -------------------------------
      GSAP: 初期状態（フラッシュ防止）
+     bgを「少し寄り」から開始 → 像が整って入る
   -------------------------------- */
   useLayoutEffect(() => {
-    if (reduce) return;
+    if (prefersReduce()) return;
+
     const el = rootRef.current;
     if (!el) return;
 
@@ -149,62 +155,83 @@ export default function Hero() {
 
     const ctx = gsap.context(() => {
       const q = gsap.utils.selector(el);
+
+      const bg = q(`.${styles.bg}`);
+      const veil = q(`.${styles.veil}`);
+      const read = q(`.${styles.read}`);
+      const depth = q(`.${styles.depth}`);
+
       const titleLines = q(`.${styles.titleLine}`);
       const lead = q(`.${styles.lead}`);
       const scope = q(`.${styles.scope}`);
 
-      // 初期を“上品に隠す”
+      // 画像：フェード + 微ズーム（アップ）
+      gsap.set(bg, { opacity: 0, scale: 1.08, y: 8, transformOrigin: "50% 50%" });
+      gsap.set([veil, read, depth], { opacity: 0 });
+
+      // 文字：下から上品に
       gsap.set(titleLines, { opacity: 0, y: 28 });
       gsap.set([lead, scope], { opacity: 0, y: 12 });
     }, el);
 
     return () => ctx.revert();
-  }, [reduce]);
+  }, []);
 
   /* -------------------------------
-     GSAP: タイトルを下からフェードイン（上品）
+     GSAP: ヒーロー入場
+     画像→文字 の順で、上品に一体化
   -------------------------------- */
   useLayoutEffect(() => {
-    if (reduce) return;
+    if (prefersReduce()) return;
     if (!inView) return;
 
     const el = rootRef.current;
     if (!el) return;
 
+    gsap.registerPlugin(ScrollTrigger);
+
     const ctx = gsap.context(() => {
       const q = gsap.utils.selector(el);
+
+      const bg = q(`.${styles.bg}`);
+      const veil = q(`.${styles.veil}`);
+      const read = q(`.${styles.read}`);
+      const depth = q(`.${styles.depth}`);
+
       const titleLines = q(`.${styles.titleLine}`);
       const lead = q(`.${styles.lead}`);
       const scope = q(`.${styles.scope}`);
 
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
-      tl.to(titleLines, {
-        opacity: 1,
-        y: 0,
-        duration: 0.78,
-        stagger: 0.10,
-      }).to(
-        [lead, scope],
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.62,
-          stagger: 0.08,
-        },
-        "-=0.34"
-      );
+      // 画像を先に“像が整う”
+      tl.to(veil, { opacity: 0.90, duration: 0.95, ease: "power2.out" }, 0)
+        .to(read, { opacity: 0.82, duration: 0.95, ease: "power2.out" }, 0)
+        .to(depth, { opacity: 0.86, duration: 0.95, ease: "power2.out" }, 0)
+        .to(bg, { opacity: 0.985, scale: 1.02, y: 0, duration: 1.10, ease: "power2.out" }, 0)
+        // 大きい文字：下からフェードイン
+        .to(
+          titleLines,
+          { opacity: 1, y: 0, duration: 0.78, stagger: 0.10 },
+          0.12
+        )
+        .to(
+          [lead, scope],
+          { opacity: 1, y: 0, duration: 0.62, stagger: 0.08 },
+          0.52
+        );
     }, el);
 
     return () => ctx.revert();
-  }, [reduce, inView]);
+  }, [inView]);
 
   /* -------------------------------
-     ScrollTrigger: 多層の迫力（bg/veil/depth）
-     ※動きは“微差”だけ。酔わない。
+     ScrollTrigger: 画像の“引き” + 多層の奥行き（微差）
+     ※酔わない量だけ
   -------------------------------- */
   useLayoutEffect(() => {
-    if (reduce) return;
+    if (prefersReduce()) return;
+
     const el = rootRef.current;
     if (!el) return;
 
@@ -218,40 +245,43 @@ export default function Hero() {
       const depth = q(`.${styles.depth}`);
       const bigEn = q(`.${styles.bigEn}`);
 
-      // スクロールで“奥行き”だけ作る（微差）
+      // アップ → すこし引き（スクロールで戻る）
       gsap.to(bg, {
         scale: 1.0,
+        y: -8,
         ease: "none",
         scrollTrigger: {
           trigger: el,
           start: "top top",
           end: "bottom top",
-          scrub: 0.8,
+          scrub: 0.7,
         },
       });
 
+      // 膜は少し薄くなっていく（写真を返す）
       gsap.to(veil, {
-        opacity: 0.72,
+        opacity: 0.70,
         ease: "none",
         scrollTrigger: {
           trigger: el,
           start: "top top",
           end: "bottom top",
-          scrub: 0.8,
+          scrub: 0.7,
         },
       });
 
       gsap.to(read, {
-        opacity: 0.78,
+        opacity: 0.74,
         ease: "none",
         scrollTrigger: {
           trigger: el,
           start: "top top",
           end: "bottom top",
-          scrub: 0.8,
+          scrub: 0.7,
         },
       });
 
+      // depthは“浮遊”だけ
       gsap.to(depth, {
         y: -18,
         opacity: 0.95,
@@ -260,7 +290,7 @@ export default function Hero() {
           trigger: el,
           start: "top top",
           end: "bottom top",
-          scrub: 0.8,
+          scrub: 0.7,
         },
       });
 
@@ -271,13 +301,13 @@ export default function Hero() {
           trigger: el,
           start: "top top",
           end: "bottom top",
-          scrub: 0.8,
+          scrub: 0.7,
         },
       });
     }, el);
 
     return () => ctx.revert();
-  }, [reduce]);
+  }, []);
 
   return (
     <section
