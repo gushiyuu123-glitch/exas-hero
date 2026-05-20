@@ -28,7 +28,7 @@ const HERO = {
   headerCta: { label: "お問い合わせ", href: "#contact" },
 
   // 英字オブジェクト（読ませない）
-  bigEnA: "BACKBONE",
+  bigEnA: "62%",
   bigEnB: "TRUST",
 };
 
@@ -69,8 +69,12 @@ export default function Hero() {
       if (!target) return;
 
       e.preventDefault();
+
+      // ヘッダーの縦を削ったのでオフセットも少し下げる
+      const offset = 92;
+
       window.scrollTo({
-        top: target.getBoundingClientRect().top + window.scrollY - 104,
+        top: target.getBoundingClientRect().top + window.scrollY - offset,
         behavior: reduce ? "auto" : "smooth",
       });
     },
@@ -101,7 +105,7 @@ export default function Hero() {
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <a className={styles.logo} href="#top" aria-label="EXAS Inc.">
-            {/* public/EXAS.svg を置く */}
+            {/* public/EXAS.svg */}
             <img
               className={styles.logoSvg}
               src="/EXAS.svg"
@@ -158,7 +162,6 @@ export default function Hero() {
               <div className={styles.scope} aria-label="対応領域">
                 {HERO.scope}
               </div>
-
               {/* CTAは本文から撤去：ヘッダーに集約 */}
             </div>
           </div>
