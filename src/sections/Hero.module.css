@@ -329,7 +329,7 @@
     rgba(223,242,173,0.12) 66%,
     rgba(47,111,230,0.18) 78%,
     rgba(47,111,230,0.00) 100%);
-  opacity: 0.86;
+  opacity: 0.90;
 }
 
 .logo {
@@ -357,7 +357,7 @@
   position: relative;
   text-decoration: none;
 
-  color: rgba(10, 26, 51, 0.74);
+  color: rgba(10, 26, 51, 0.86);
   font-size: 14px;
   letter-spacing: 0.06em;
 
