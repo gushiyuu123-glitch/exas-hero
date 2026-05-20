@@ -24,15 +24,27 @@ const HERO = {
 
   headerCta: { label: "お問い合わせ", href: "#contact" },
 
-  // object（読ませない）
   bigEnA: "62%",
   bigEnB: "TRUST",
 };
+
+const TICKER_ITEMS = [
+  { text: "2026年3月期 第3四半期決算説明会資料を掲載しました。", href: "#news" },
+  { text: "システムメンテナンスのお知らせ（5/25 2:00〜4:00）", href: "#news" },
+  { text: "導入事例を1件追加しました。", href: "#case" },
+];
 
 export default function Hero() {
   const rootRef = useRef(null);
   const [inView, setInView] = useState(false);
   const [reduce, setReduce] = useState(false);
+
+  // ticker
+  const [tickIdx, setTickIdx] = useState(0);
+  const [tickPhase, setTickPhase] = useState("enter"); // prep | enter | leave
+  const [tickPaused, setTickPaused] = useState(false);
+  const tickIntervalRef = useRef(null);
+  const tickLeaveRef = useRef(null);
 
   useEffect(() => {
     const r = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
@@ -80,6 +92,49 @@ export default function Hero() {
     [reduce]
   );
 
+  useEffect(() => {
+    const items = TICKER_ITEMS;
+    if (!items?.length || items.length <= 1) return;
+    if (tickPaused) return;
+
+    if (tickIntervalRef.current) window.clearInterval(tickIntervalRef.current);
+    if (tickLeaveRef.current) window.clearTimeout(tickLeaveRef.current);
+
+    // reduced-motion: 切替だけ
+    if (reduce) {
+      tickIntervalRef.current = window.setInterval(() => {
+        setTickIdx((v) => (v + 1) % items.length);
+      }, 6500);
+      return () => window.clearInterval(tickIntervalRef.current);
+    }
+
+    const interval = 6500; // 速いと広告臭
+    const leaveMs = 240;
+
+    tickIntervalRef.current = window.setInterval(() => {
+      setTickPhase("leave");
+
+      tickLeaveRef.current = window.setTimeout(() => {
+        setTickIdx((v) => (v + 1) % items.length);
+        setTickPhase("prep");
+        requestAnimationFrame(() => setTickPhase("enter"));
+      }, leaveMs);
+    }, interval);
+
+    return () => {
+      if (tickIntervalRef.current) window.clearInterval(tickIntervalRef.current);
+      if (tickLeaveRef.current) window.clearTimeout(tickLeaveRef.current);
+    };
+  }, [reduce, tickPaused]);
+
+  const tickItem = TICKER_ITEMS[tickIdx] || TICKER_ITEMS[0];
+
+  const pauseTicker = () => {
+    setTickPaused(true);
+    setTickPhase("enter");
+  };
+  const resumeTicker = () => setTickPaused(false);
+
   return (
     <section
       ref={rootRef}
@@ -91,8 +146,6 @@ export default function Hero() {
       {/* bg */}
       <div className={styles.bg} aria-hidden="true" />
       <div className={styles.veil} aria-hidden="true" />
-
-      {/* “資料の板” */}
       <div className={styles.read} aria-hidden="true" />
 
       {/* big object */}
@@ -103,11 +156,30 @@ export default function Hero() {
 
       {/* header */}
       <header className={styles.header} data-hero-header="1">
-        <div className={styles.ticker} aria-label="お知らせ">
-          <span className={styles.tickerLabel}>お知らせ</span>
-          <span className={styles.tickerText}>
-            2026年3月期 第3四半期決算説明会資料を掲載しました。&nbsp;／&nbsp;
-            システムメンテナンスのお知らせ（5/25 2:00〜4:00）
+        <div
+          className={styles.ticker}
+          aria-label="お知らせ"
+          onMouseEnter={pauseTicker}
+          onMouseLeave={resumeTicker}
+          onFocusCapture={pauseTicker}
+          onBlurCapture={resumeTicker}
+        >
+          <span className={styles.tickerLabel}>NEWS</span>
+
+          <span className={styles.tickerText} aria-live="polite" aria-atomic="true">
+            <a
+              className={`${styles.tickerMsg} ${
+                tickPhase === "enter"
+                  ? styles.msgEnter
+                  : tickPhase === "leave"
+                  ? styles.msgLeave
+                  : styles.msgPrep
+              }`}
+              href={tickItem?.href ?? "#news"}
+              onClick={onJump(tickItem?.href ?? "#news")}
+            >
+              {tickItem?.text ?? ""}
+            </a>
           </span>
         </div>
 
@@ -135,13 +207,34 @@ export default function Hero() {
             ))}
           </nav>
 
-          <a
-            className={styles.headerCta}
-            href={HERO.headerCta.href}
-            onClick={onJump(HERO.headerCta.href)}
-          >
-            {HERO.headerCta.label}
-          </a>
+          <div className={styles.util}>
+            <div className={styles.lang} aria-label="言語切替">
+              <a className={`${styles.langLink} ${styles.langActive}`} href="#top">
+                JP
+              </a>
+              <span className={styles.langSep} aria-hidden="true">
+                /
+              </span>
+              <a className={styles.langLink} href="#top">
+                EN
+              </a>
+            </div>
+
+            <a
+              className={styles.headerCta}
+              href={HERO.headerCta.href}
+              onClick={onJump(HERO.headerCta.href)}
+            >
+              {HERO.headerCta.label}
+            </a>
+
+            {/* PCは消す。SPだけ出す（CSSで） */}
+            <button className={styles.menuBtn} type="button" aria-label="メニュー">
+              <span className={styles.menuBar} />
+              <span className={styles.menuBar} />
+              <span className={styles.menuBar} />
+            </button>
+          </div>
         </div>
       </header>
 
