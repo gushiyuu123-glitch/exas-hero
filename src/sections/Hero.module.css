@@ -14,25 +14,65 @@
     "Yu Gothic", "Meiryo", sans-serif;
 }
 
-/* bg */
+/* ================================
+   bg：写真の“現場感”を戻す（粒子＋端落ち＋わずかに締める）
+================================ */
 .bg {
   position: absolute;
   inset: 0;
   z-index: 1;
   background: var(--hero) center / cover no-repeat;
-  transform: scale(1.02);
 
-  /* 靄を減らす：写真を戻す */
-  filter: saturate(0.96) contrast(0.98) brightness(0.92) grayscale(0.02);
-  opacity: 0.985;
+  /* “綺麗すぎ”を殺して、少しだけドキュメント寄りに */
+  transform: scale(1.015);
+  filter: saturate(0.94) contrast(1.04) brightness(0.90) grayscale(0.015);
+  opacity: 0.992;
 
   will-change: transform, opacity;
   transform-origin: 50% 50%;
-
   pointer-events: none;
 }
 
-/* veil：中央→右の膜（薄く） */
+/* 端落ち（締まり） */
+.bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+
+  background:
+    radial-gradient(1200px 760px at 74% 46%,
+      rgba(0,0,0,0) 0%,
+      rgba(0,0,0,0.10) 58%,
+      rgba(0,0,0,0.22) 100%),
+    linear-gradient(180deg,
+      rgba(0,0,0,0.12) 0%,
+      rgba(0,0,0,0.00) 38%);
+  opacity: 0.92;
+}
+
+/* 粒子（SVGノイズ：CSSだけで“空気”を作る） */
+.bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+  background-size: 240px 240px;
+
+  opacity: 0.055; /* ここが“仕事感”の量。上げすぎ厳禁 */
+  mix-blend-mode: overlay;
+}
+
+/* mix-blend が効かない環境は“ただ薄い粒子”として残す */
+@supports not (mix-blend-mode: overlay) {
+  .bg::after { opacity: 0.035; }
+}
+
+/* ================================
+   veil：中央→右の膜（薄い “反射” として流す）
+================================ */
 .veil {
   position: absolute;
   inset: 0;
@@ -40,26 +80,35 @@
   pointer-events: none;
 
   background:
+    /* 横：中央から右に“流れる” */
     linear-gradient(
       90deg,
       transparent 0%,
-      transparent 54%,
-      rgba(0, 30, 60, 0.08) 66%,
-      rgba(0, 30, 60, 0.04) 80%,
+      transparent 57%,
+      rgba(0, 30, 60, 0.070) 68%,
+      rgba(0, 30, 60, 0.035) 82%,
       transparent 100%
     ),
+    /* 縦：上だけうっすら（ベタ塗り回避） */
     linear-gradient(
       180deg,
-      rgba(0, 20, 40, 0.16) 0%,
-      rgba(0, 20, 40, 0.06) 24%,
-      rgba(0, 20, 40, 0) 42%
-    );
+      rgba(0, 20, 40, 0.12) 0%,
+      rgba(0, 20, 40, 0.05) 22%,
+      rgba(0, 20, 40, 0) 44%
+    ),
+    /* 反射：右上の“薄い光” */
+    radial-gradient(880px 520px at 84% 18%,
+      rgba(255,255,255,0.09) 0%,
+      rgba(255,255,255,0.04) 38%,
+      transparent 70%);
 
-  opacity: 0.90;
+  opacity: 0.86;
   will-change: opacity, transform;
 }
 
-/* depth：迫力の“多層”用（かなり薄い光膜） */
+/* ================================
+   depth：迫力の“多層”＝光膜じゃなく空気の段差
+================================ */
 .depth{
   position: absolute;
   inset: 0;
@@ -67,35 +116,43 @@
   pointer-events: none;
 
   background:
-    radial-gradient(900px 520px at 72% 40%,
-      rgba(255,255,255,0.10) 0%,
-      rgba(255,255,255,0.05) 40%,
+    radial-gradient(980px 560px at 78% 44%,
+      rgba(255,255,255,0.075) 0%,
+      rgba(255,255,255,0.030) 42%,
       transparent 74%),
-    radial-gradient(720px 420px at 18% 70%,
-      rgba(64,214,255,0.06) 0%,
-      transparent 62%);
+    radial-gradient(760px 520px at 18% 78%,
+      rgba(64,214,255,0.045) 0%,
+      transparent 66%);
 
-  opacity: 0.86;
+  opacity: 0.84;
   transform: translateY(0);
   will-change: opacity, transform;
 }
 
-/* read：左の可読帯（靄を少し減らす） */
+/* ================================
+   read：左の可読帯（白モヤを左寄せ＋上だけ薄い影）
+================================ */
 .read {
   position: absolute;
   inset: 0;
   z-index: 3;
   pointer-events: none;
 
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.82) 0%,
-    rgba(255, 255, 255, 0.66) 30%,
-    rgba(255, 255, 255, 0.14) 52%,
-    rgba(255, 255, 255, 0) 64%
-  );
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255,255,255,0.86) 0%,
+      rgba(255,255,255,0.68) 26%,
+      rgba(255,255,255,0.14) 46%,
+      rgba(255,255,255,0) 60%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(0,0,0,0.06) 0%,
+      rgba(0,0,0,0.00) 34%
+    );
 
-  opacity: 0.82;
+  opacity: 0.84;
   will-change: opacity, transform;
 }
 
@@ -153,11 +210,11 @@
   align-items: center;
   gap: 12px;
 
-  border-bottom: 1px solid rgba(10, 18, 28, 0.10);
-  background: rgba(255, 255, 255, 0.20);
+  border-bottom: 1px solid rgba(10, 18, 28, 0.14);
+  background: rgba(255, 255, 255, 0.18);
 
-  -webkit-backdrop-filter: blur(9px) saturate(1.05);
-  backdrop-filter: blur(9px) saturate(1.05);
+  -webkit-backdrop-filter: blur(8px) saturate(1.06);
+  backdrop-filter: blur(8px) saturate(1.06);
 }
 
 .tickerLabel {
@@ -211,11 +268,11 @@
   align-items: center;
   gap: clamp(18px, 2.4vw, 44px);
 
-  border-bottom: 1px solid rgba(10, 18, 28, 0.10);
-  background: rgba(255, 255, 255, 0.18);
+  border-bottom: 1px solid rgba(10, 18, 28, 0.14);
+  background: rgba(255, 255, 255, 0.14);
 
-  -webkit-backdrop-filter: blur(10px) saturate(1.05);
-  backdrop-filter: blur(10px) saturate(1.05);
+  -webkit-backdrop-filter: blur(9px) saturate(1.06);
+  backdrop-filter: blur(9px) saturate(1.06);
 }
 
 .logo { display: inline-flex; align-items: center; text-decoration: none; }
@@ -285,23 +342,27 @@
 /* CTA */
 .headerCta {
   text-decoration: none;
-  color: rgba(10, 18, 28, 0.92);
+  color: rgba(10, 18, 28, 0.94);
   font-size: 13px;
   letter-spacing: 0.06em;
   padding: 11px 14px;
 
   border-radius: 8px;
-  border: 1px solid rgba(10, 18, 28, 0.20);
-  background: rgba(255, 255, 255, 0.46);
-  box-shadow: 0 10px 22px rgba(0,0,0,0.10);
+  border: 1px solid rgba(10, 18, 28, 0.22);
+  background: rgba(255, 255, 255, 0.62);
+  box-shadow:
+    0 12px 26px rgba(0,0,0,0.12),
+    0 1px 0 rgba(255,255,255,0.65) inset;
 
   white-space: nowrap;
   transition: border-color 220ms ease, background 220ms ease, box-shadow 220ms ease;
 }
 .headerCta:hover {
-  border-color: rgba(10, 18, 28, 0.26);
-  background: rgba(255, 255, 255, 0.54);
-  box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+  border-color: rgba(10, 18, 28, 0.28);
+  background: rgba(255, 255, 255, 0.70);
+  box-shadow:
+    0 14px 30px rgba(0,0,0,0.14),
+    0 1px 0 rgba(255,255,255,0.70) inset;
 }
 
 /* menu：PCでは消す。SPだけ */
