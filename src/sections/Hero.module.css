@@ -1,5 +1,6 @@
 /* src/sections/Hero.module.css
    Premium Corporate (Blue x White) — blue is "edge + reflection", not "fill"
+   + Accent: mint / lime (VERY LIGHT, only on lines)
 */
 @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;600;700&display=swap");
 
@@ -20,8 +21,10 @@
   --text: #0f172a;        /* 本文（黒寄りの紺） */
   --text-mid: rgba(14, 26, 46, 0.66);
 
-  /* “未来感”はシアンを面で使わない（反射だけ） */
-  --accent: #74e6ff;
+  /* accent（面では使わない：線/反射だけ） */
+  --accent: #74e6ff;      /* cyan */
+  --mint: #7fe6c7;        /* 薄いミント */
+  --lime: #dff2ad;        /* 薄い黄緑 */
 
   --dur: 660ms;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -34,6 +37,9 @@
     "Yu Gothic", "Meiryo", sans-serif;
   color-scheme: light;
 }
+
+/* CSS Modules export guarantee */
+.in {}
 
 /* ================================
    bg：色を落ち着かせて“上質”
@@ -119,6 +125,7 @@
 
 /* ================================
    depth：青・シアンは“薄い反射”だけ
+   + ミント/黄緑は“奥の気配”として極薄
 ================================ */
 .depth {
   position: absolute;
@@ -133,7 +140,13 @@
       transparent 76%),
     radial-gradient(720px 500px at 18% 82%,
       rgba(116, 230, 255, 0.035) 0%,
-      transparent 62%);
+      transparent 62%),
+    radial-gradient(760px 520px at 28% 74%,
+      rgba(127, 230, 199, 0.018) 0%,
+      transparent 66%),
+    radial-gradient(760px 520px at 34% 66%,
+      rgba(223, 242, 173, 0.012) 0%,
+      transparent 68%);
 
   opacity: 0.84;
   will-change: opacity, transform;
@@ -193,7 +206,7 @@
   letter-spacing: -0.02em;
   font-weight: 800;
   font-size: clamp(96px, 12vw, 220px);
-  color: rgba(10, 26, 51, 0.050); /* 濃くしない */
+  color: rgba(10, 26, 51, 0.050);
   transform: translateX(-0.02em);
 }
 
@@ -203,7 +216,7 @@
   letter-spacing: 0.02em;
   font-weight: 700;
   font-size: clamp(42px, 4.6vw, 86px);
-  color: rgba(47, 111, 230, 0.085); /* 霧レベル */
+  color: rgba(47, 111, 230, 0.085);
   transform: translateX(-0.01em);
 }
 
@@ -217,7 +230,7 @@
   padding-top: env(safe-area-inset-top, 0px);
 }
 
-/* ticker：青ベタを捨てて、上質に */
+/* ticker */
 .ticker {
   width: min(1840px, 100%);
   margin: 0 auto;
@@ -233,7 +246,6 @@
   backdrop-filter: blur(10px) saturate(1.05);
 }
 
-/* NEWS：面で塗らない。縁と線で出す */
 .tickerLabel {
   font-size: 11px;
   font-weight: 700;
@@ -280,7 +292,7 @@
 .msgEnter { opacity: 1; transform: translateX(0); }
 .msgLeave { opacity: 0; transform: translateX(-18px); transition-duration: 240ms; }
 
-/* headerInner：太い青ボーダーを捨てる（上質） */
+/* headerInner */
 .headerInner {
   width: min(1840px, 100%);
   margin: 0 auto;
@@ -302,7 +314,7 @@
   position: relative;
 }
 
-/* 未来感の署名：上端に“ごく薄い”青〜シアンライン */
+/* 署名ライン：青 → シアン → ミント → 黄緑（薄い） */
 .headerInner::after{
   content:"";
   position:absolute;
@@ -311,9 +323,11 @@
   pointer-events:none;
   background: linear-gradient(90deg,
     rgba(47,111,230,0.00) 0%,
-    rgba(47,111,230,0.24) 34%,
-    rgba(116,230,255,0.18) 56%,
-    rgba(47,111,230,0.22) 76%,
+    rgba(47,111,230,0.22) 28%,
+    rgba(116,230,255,0.16) 52%,
+    rgba(127,230,199,0.14) 60%,
+    rgba(223,242,173,0.12) 66%,
+    rgba(47,111,230,0.18) 78%,
     rgba(47,111,230,0.00) 100%);
   opacity: 0.86;
 }
@@ -330,7 +344,7 @@
   opacity: 0.98;
 }
 
-/* nav：インクで読む。青は下線だけ */
+/* nav */
 .nav {
   display: flex;
   justify-content: center;
@@ -357,6 +371,7 @@
 }
 .navLink:hover { color: rgba(10, 26, 51, 0.94); }
 
+/* 下線：青 → シアン → ミント → 黄緑（でも薄い） */
 .navLink::after {
   content: "";
   position: absolute;
@@ -366,9 +381,11 @@
   height: 2px;
 
   background: linear-gradient(90deg,
-    rgba(47,111,230,0.62) 0%,
-    rgba(116,230,255,0.38) 55%,
-    rgba(47,111,230,0.56) 100%);
+    rgba(47,111,230,0.58) 0%,
+    rgba(116,230,255,0.30) 52%,
+    rgba(127,230,199,0.22) 62%,
+    rgba(223,242,173,0.18) 68%,
+    rgba(47,111,230,0.52) 100%);
 
   opacity: 0;
   transform: scaleX(0.35);
@@ -407,7 +424,7 @@
 .langActive { color: rgba(10, 26, 51, 0.86); font-weight: 700; }
 .langSep { color: rgba(10, 26, 51, 0.28); font-size: 11px; }
 
-/* CTA：青ベタをやめて“白板＋青縁” → 上質 */
+/* CTA：白板＋青縁（上質） + hoverで薄ミントリング */
 .headerCta {
   text-decoration: none;
   font-size: 13px;
@@ -426,13 +443,16 @@
     0 1px 0 rgba(255, 255, 255, 0.70) inset;
 
   white-space: nowrap;
-  transition: background 200ms ease, border-color 200ms ease, color 200ms ease, transform 200ms var(--ease);
+  transition: background 200ms ease, border-color 200ms ease, color 200ms ease, transform 200ms var(--ease), box-shadow 200ms ease;
 }
 .headerCta:hover {
   transform: translateY(-1px);
   background: rgba(47, 111, 230, 0.92);
   border-color: rgba(47, 111, 230, 0.34);
   color: rgba(255,255,255,0.96);
+  box-shadow:
+    0 18px 40px rgba(10, 26, 51, 0.12),
+    0 0 0 1px rgba(127, 230, 199, 0.14) inset;
 }
 
 /* menu（SPのみ） */
@@ -482,7 +502,7 @@
   color: var(--text);
 }
 
-/* 縦線：青の“細い署名” */
+/* 縦線：青主、ミント/黄緑は“芯の一瞬”だけ */
 .copyStage::before {
   content: "";
   position: absolute;
@@ -493,7 +513,9 @@
   background: linear-gradient(180deg,
     rgba(47,111,230,0.18) 0%,
     rgba(47,111,230,0.72) 28%,
-    rgba(116,230,255,0.44) 55%,
+    rgba(116,230,255,0.36) 52%,
+    rgba(127,230,199,0.22) 60%,
+    rgba(223,242,173,0.18) 66%,
     rgba(47,111,230,0.62) 78%,
     rgba(47,111,230,0.16) 100%);
   opacity: 0.90;
@@ -519,7 +541,11 @@
   content: "";
   width: 14px;
   height: 1.5px;
-  background: rgba(47, 111, 230, 0.82);
+  background: linear-gradient(90deg,
+    rgba(47,111,230,0.82) 0%,
+    rgba(127,230,199,0.28) 60%,
+    rgba(223,242,173,0.18) 68%,
+    rgba(47,111,230,0.74) 100%);
   flex-shrink: 0;
 }
 .kickerSub {
@@ -539,7 +565,7 @@
   font-size: clamp(36px, 4.2vw, 66px);
   color: var(--blue-ink);
 }
-.titleLine { display: block; } /* GSAPで制御 */
+.titleLine { display: block; }
 
 /* lead */
 .lead {
