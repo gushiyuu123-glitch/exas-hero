@@ -12,22 +12,19 @@ const NAV = [
 ];
 
 const HERO = {
-  // public に置く前提
   bg: "/hero-exas-meeting.png",
 
   kickerLeft: "SUCCESS RATE 38%",
   kickerRight: "CLIENT-SIDE",
 
   title: "基幹刷新には、\n失敗の型がある。",
-
-  lead: "ベンダー側の内側で失敗の型を見てきたから、発注企業の代理人として“事故”を根本から潰せます。",
-
+  lead:
+    "ベンダー側の内側で失敗の型を見てきたから、発注企業の代理人として“事故”を根本から潰せます。",
   scope: "ERP入替 / 基幹刷新 / PMO / ベンダー選定・評価",
 
-  // CTAは“ヘッダーに集約”する（本文は黙らせる）
   headerCta: { label: "お問い合わせ", href: "#contact" },
 
-  // 英字オブジェクト（読ませない）
+  // object（読ませない）
   bigEnA: "62%",
   bigEnB: "TRUST",
 };
@@ -65,13 +62,15 @@ export default function Hero() {
   const onJump = useMemo(
     () => (href) => (e) => {
       if (!href?.startsWith("#")) return;
+
       const target = document.getElementById(href.slice(1));
       if (!target) return;
 
       e.preventDefault();
 
-      // ヘッダーの縦を削ったのでオフセットも少し下げる
-      const offset = 92;
+      const headerEl = document.querySelector('[data-hero-header="1"]');
+      const offset =
+        headerEl ? Math.ceil(headerEl.getBoundingClientRect().height) + 12 : 92;
 
       window.scrollTo({
         top: target.getBoundingClientRect().top + window.scrollY - offset,
@@ -86,26 +85,34 @@ export default function Hero() {
       ref={rootRef}
       id="top"
       className={`${styles.section} ${inView ? styles.in : ""}`}
-      style={{ "--hero": `url(${HERO.bg})` }}
+      style={{ "--hero": `url("${HERO.bg}")` }}
       aria-label="EXAS ヒーロー"
     >
-      {/* bg stack */}
+      {/* bg */}
       <div className={styles.bg} aria-hidden="true" />
       <div className={styles.veil} aria-hidden="true" />
-      <div className={styles.grid} aria-hidden="true" />
+
+      {/* “資料の板” */}
       <div className={styles.read} aria-hidden="true" />
 
-      {/* big english object (behind copy) */}
+      {/* big object */}
       <div className={styles.bigEn} aria-hidden="true">
         <span className={styles.bigEnA}>{HERO.bigEnA}</span>
         <span className={styles.bigEnB}>{HERO.bigEnB}</span>
       </div>
 
       {/* header */}
-      <header className={styles.header}>
+      <header className={styles.header} data-hero-header="1">
+        <div className={styles.ticker} aria-label="お知らせ">
+          <span className={styles.tickerLabel}>お知らせ</span>
+          <span className={styles.tickerText}>
+            2026年3月期 第3四半期決算説明会資料を掲載しました。&nbsp;／&nbsp;
+            システムメンテナンスのお知らせ（5/25 2:00〜4:00）
+          </span>
+        </div>
+
         <div className={styles.headerInner}>
           <a className={styles.logo} href="#top" aria-label="EXAS Inc.">
-            {/* public/EXAS.svg */}
             <img
               className={styles.logoSvg}
               src="/EXAS.svg"
@@ -162,7 +169,6 @@ export default function Hero() {
               <div className={styles.scope} aria-label="対応領域">
                 {HERO.scope}
               </div>
-              {/* CTAは本文から撤去：ヘッダーに集約 */}
             </div>
           </div>
         </div>
