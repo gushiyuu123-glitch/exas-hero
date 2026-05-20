@@ -1,6 +1,9 @@
 // src/sections/Hero.jsx
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useLayoutEffect } from "react";
 import styles from "./Hero.module.css";
+
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 const NAV = [
   { label: "事業内容", href: "#business" },
@@ -100,7 +103,6 @@ export default function Hero() {
     if (tickIntervalRef.current) window.clearInterval(tickIntervalRef.current);
     if (tickLeaveRef.current) window.clearTimeout(tickLeaveRef.current);
 
-    // reduced-motion: 切替だけ
     if (reduce) {
       tickIntervalRef.current = window.setInterval(() => {
         setTickIdx((v) => (v + 1) % items.length);
@@ -108,7 +110,7 @@ export default function Hero() {
       return () => window.clearInterval(tickIntervalRef.current);
     }
 
-    const interval = 6500; // 速いと広告臭
+    const interval = 6500;
     const leaveMs = 240;
 
     tickIntervalRef.current = window.setInterval(() => {
@@ -135,6 +137,148 @@ export default function Hero() {
   };
   const resumeTicker = () => setTickPaused(false);
 
+  /* -------------------------------
+     GSAP: 初期状態（フラッシュ防止）
+  -------------------------------- */
+  useLayoutEffect(() => {
+    if (reduce) return;
+    const el = rootRef.current;
+    if (!el) return;
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    const ctx = gsap.context(() => {
+      const q = gsap.utils.selector(el);
+      const titleLines = q(`.${styles.titleLine}`);
+      const lead = q(`.${styles.lead}`);
+      const scope = q(`.${styles.scope}`);
+
+      // 初期を“上品に隠す”
+      gsap.set(titleLines, { opacity: 0, y: 28 });
+      gsap.set([lead, scope], { opacity: 0, y: 12 });
+    }, el);
+
+    return () => ctx.revert();
+  }, [reduce]);
+
+  /* -------------------------------
+     GSAP: タイトルを下からフェードイン（上品）
+  -------------------------------- */
+  useLayoutEffect(() => {
+    if (reduce) return;
+    if (!inView) return;
+
+    const el = rootRef.current;
+    if (!el) return;
+
+    const ctx = gsap.context(() => {
+      const q = gsap.utils.selector(el);
+      const titleLines = q(`.${styles.titleLine}`);
+      const lead = q(`.${styles.lead}`);
+      const scope = q(`.${styles.scope}`);
+
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+      tl.to(titleLines, {
+        opacity: 1,
+        y: 0,
+        duration: 0.78,
+        stagger: 0.10,
+      }).to(
+        [lead, scope],
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.62,
+          stagger: 0.08,
+        },
+        "-=0.34"
+      );
+    }, el);
+
+    return () => ctx.revert();
+  }, [reduce, inView]);
+
+  /* -------------------------------
+     ScrollTrigger: 多層の迫力（bg/veil/depth）
+     ※動きは“微差”だけ。酔わない。
+  -------------------------------- */
+  useLayoutEffect(() => {
+    if (reduce) return;
+    const el = rootRef.current;
+    if (!el) return;
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    const ctx = gsap.context(() => {
+      const q = gsap.utils.selector(el);
+      const bg = q(`.${styles.bg}`);
+      const veil = q(`.${styles.veil}`);
+      const read = q(`.${styles.read}`);
+      const depth = q(`.${styles.depth}`);
+      const bigEn = q(`.${styles.bigEn}`);
+
+      // スクロールで“奥行き”だけ作る（微差）
+      gsap.to(bg, {
+        scale: 1.0,
+        ease: "none",
+        scrollTrigger: {
+          trigger: el,
+          start: "top top",
+          end: "bottom top",
+          scrub: 0.8,
+        },
+      });
+
+      gsap.to(veil, {
+        opacity: 0.72,
+        ease: "none",
+        scrollTrigger: {
+          trigger: el,
+          start: "top top",
+          end: "bottom top",
+          scrub: 0.8,
+        },
+      });
+
+      gsap.to(read, {
+        opacity: 0.78,
+        ease: "none",
+        scrollTrigger: {
+          trigger: el,
+          start: "top top",
+          end: "bottom top",
+          scrub: 0.8,
+        },
+      });
+
+      gsap.to(depth, {
+        y: -18,
+        opacity: 0.95,
+        ease: "none",
+        scrollTrigger: {
+          trigger: el,
+          start: "top top",
+          end: "bottom top",
+          scrub: 0.8,
+        },
+      });
+
+      gsap.to(bigEn, {
+        y: 10,
+        ease: "none",
+        scrollTrigger: {
+          trigger: el,
+          start: "top top",
+          end: "bottom top",
+          scrub: 0.8,
+        },
+      });
+    }, el);
+
+    return () => ctx.revert();
+  }, [reduce]);
+
   return (
     <section
       ref={rootRef}
@@ -143,9 +287,10 @@ export default function Hero() {
       style={{ "--hero": `url("${HERO.bg}")` }}
       aria-label="EXAS ヒーロー"
     >
-      {/* bg */}
+      {/* bg layers */}
       <div className={styles.bg} aria-hidden="true" />
       <div className={styles.veil} aria-hidden="true" />
+      <div className={styles.depth} aria-hidden="true" />
       <div className={styles.read} aria-hidden="true" />
 
       {/* big object */}
@@ -228,7 +373,6 @@ export default function Hero() {
               {HERO.headerCta.label}
             </a>
 
-            {/* PCは消す。SPだけ出す（CSSで） */}
             <button className={styles.menuBtn} type="button" aria-label="メニュー">
               <span className={styles.menuBar} />
               <span className={styles.menuBar} />
@@ -250,7 +394,7 @@ export default function Hero() {
 
               <h1 className={styles.title}>
                 {HERO.title.split("\n").map((line, i) => (
-                  <span key={i} className={styles.titleLine} style={{ "--i": i }}>
+                  <span key={i} className={styles.titleLine}>
                     {line}
                   </span>
                 ))}
