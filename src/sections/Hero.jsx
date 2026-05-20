@@ -12,22 +12,24 @@ const NAV = [
 ];
 
 const HERO = {
+  // public に置く前提
   bg: "/hero-exas-meeting.png",
 
-  // kicker：左に数字（論理）、右に立場（差別化）
   kickerLeft: "SUCCESS RATE 38%",
   kickerRight: "CLIENT-SIDE",
 
-  // H1：2行
   title: "基幹刷新には、\n失敗の型がある。",
 
-  // lead：※ "事故" で壊れてたので、日本語カギ括弧＋テンプレ文字列で安全に
-  lead: `ベンダー側の内側で失敗の型を見てきたから、発注企業の代理人として“事故”を根本から潰せます。`,
+  lead: "ベンダー側の内側で失敗の型を見てきたから、発注企業の代理人として“事故”を根本から潰せます。",
 
   scope: "ERP入替 / 基幹刷新 / PMO / ベンダー選定・評価",
 
-  ctaPrimary: { label: "お問い合わせ", href: "#contact" },
-  ctaSecondary: { label: "EXASについて", href: "#company" },
+  // CTAは“ヘッダーに集約”する（本文は黙らせる）
+  headerCta: { label: "お問い合わせ", href: "#contact" },
+
+  // 英字オブジェクト（読ませない）
+  bigEnA: "BACKBONE",
+  bigEnB: "TRUST",
 };
 
 export default function Hero() {
@@ -89,14 +91,24 @@ export default function Hero() {
       <div className={styles.grid} aria-hidden="true" />
       <div className={styles.read} aria-hidden="true" />
 
+      {/* big english object (behind copy) */}
+      <div className={styles.bigEn} aria-hidden="true">
+        <span className={styles.bigEnA}>{HERO.bigEnA}</span>
+        <span className={styles.bigEnB}>{HERO.bigEnB}</span>
+      </div>
+
       {/* header */}
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <a className={styles.logo} href="#top" aria-label="EXAS Inc.">
-            <span className={styles.logoMark} aria-hidden="true">
-              X
-            </span>
-            <span className={styles.logoText}>EXAS</span>
+            {/* public/EXAS.svg を置く */}
+            <img
+              className={styles.logoSvg}
+              src="/EXAS.svg"
+              alt="EXAS"
+              loading="eager"
+              decoding="async"
+            />
           </a>
 
           <nav className={styles.nav} aria-label="グローバルナビ">
@@ -114,10 +126,10 @@ export default function Hero() {
 
           <a
             className={styles.headerCta}
-            href={HERO.ctaPrimary.href}
-            onClick={onJump(HERO.ctaPrimary.href)}
+            href={HERO.headerCta.href}
+            onClick={onJump(HERO.headerCta.href)}
           >
-            {HERO.ctaPrimary.label}
+            {HERO.headerCta.label}
           </a>
         </div>
       </header>
@@ -132,14 +144,9 @@ export default function Hero() {
                 <span className={styles.kickerSub}>{HERO.kickerRight}</span>
               </div>
 
-              {/* 2行タイトル：行ごとにマスクワイプ */}
               <h1 className={styles.title}>
                 {HERO.title.split("\n").map((line, i) => (
-                  <span
-                    key={i}
-                    className={styles.titleLine}
-                    style={{ "--i": i }}
-                  >
+                  <span key={i} className={styles.titleLine} style={{ "--i": i }}>
                     {line}
                   </span>
                 ))}
@@ -148,34 +155,11 @@ export default function Hero() {
 
             <div className={styles.meta}>
               <p className={styles.lead}>{HERO.lead}</p>
-
               <div className={styles.scope} aria-label="対応領域">
                 {HERO.scope}
               </div>
 
-              <div className={styles.ctaRow}>
-                <a
-                  className={styles.ctaPrimary}
-                  href={HERO.ctaPrimary.href}
-                  onClick={onJump(HERO.ctaPrimary.href)}
-                >
-                  {HERO.ctaPrimary.label}
-                  <span className={styles.arrow} aria-hidden="true">
-                    →
-                  </span>
-                </a>
-
-                <a
-                  className={styles.ctaSecondary}
-                  href={HERO.ctaSecondary.href}
-                  onClick={onJump(HERO.ctaSecondary.href)}
-                >
-                  {HERO.ctaSecondary.label}
-                  <span className={styles.arrow} aria-hidden="true">
-                    →
-                  </span>
-                </a>
-              </div>
+              {/* CTAは本文から撤去：ヘッダーに集約 */}
             </div>
           </div>
         </div>
