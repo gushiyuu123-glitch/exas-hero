@@ -1,0 +1,25 @@
+:root{
+  --bg: 246 248 252;
+  --ink: 12 18 30;
+  --ink2: 30 42 60;
+  --line: 220 228 242;
+  --blue: 26 88 198;
+  --blue2: 10 30 70;
+  --ok: 34 197 94; /* 緑は“稼働” */
+}
+
+*{ box-sizing:border-box; }
+html, body{ height:100%; }
+body{
+  margin:0;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", Arial, sans-serif;
+  color: rgb(var(--ink));
+  background: rgb(var(--bg));
+  letter-spacing: 0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a{ color:inherit; text-decoration:none; }
+button{ font-family: inherit; }

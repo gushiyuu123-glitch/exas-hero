@@ -1,0 +1,473 @@
+/* src/sections/Hero.module.css */
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;600;700&display=swap");
+
+/* =========================
+   TOKEN
+========================= */
+.section {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  overflow: clip;
+
+  --ice:  234 242 255;
+  --ink:  8 14 22;
+  --line: 130 164 205;
+  --acc:  64 214 255;
+
+  --dur:  660ms;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  font-family: "IBM Plex Sans JP", system-ui, -apple-system,
+    "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+}
+
+/* =========================
+   LAYER CONTRACT
+   bg:1 → veil:2 → grid:3 → read:4 → wrap:20 → header:30
+========================= */
+
+.bg {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  /* 朝焼けが左、人物とガントチャートが右：center でちょうど収まる */
+  background: var(--hero) center / cover no-repeat;
+  transform: scale(1.02);
+  filter: saturate(1.04) contrast(1.02);
+  pointer-events: none;
+}
+
+/*
+  この画像は左が自然に明るい（夜明け光）。
+  右上のガントチャートを殺さないよう右端だけ軽く締める。
+  斜め面・強い暗幕は禁止：会議室のリアルを消さない。
+*/
+.veil {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    /* 天井から薄くグラデ（ヘッダー可読性） */
+    linear-gradient(180deg,
+      rgba(6,14,24,0.32) 0%,
+      rgba(6,14,24,0.00) 44%
+    ),
+    /* 右端を静かに締める（ガントチャートを殺さない程度） */
+    linear-gradient(90deg,
+      rgba(6,14,24,0.00) 50%,
+      rgba(6,14,24,0.14) 100%
+    );
+}
+
+/*
+  先進感は"薄い格子"で十分。
+  右側（ガントチャートのある領域）にだけ乗せてノイズを防ぐ。
+*/
+.grid {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0.10;
+  background-image:
+    repeating-linear-gradient(90deg, rgba(130,164,205,0.18) 0 1px, transparent 1px 160px),
+    repeating-linear-gradient(0deg,  rgba(130,164,205,0.12) 0 1px, transparent 1px 120px);
+  mix-blend-mode: screen;
+  /* 右 40% にだけ表示 */
+  -webkit-mask-image: linear-gradient(90deg, transparent 0 36%, #000 58% 100%);
+  mask-image:         linear-gradient(90deg, transparent 0 36%, #000 58% 100%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .grid { animation: gridDrift 7.6s linear infinite; }
+  @keyframes gridDrift {
+    0%   { background-position: 0 0, 0 0; }
+    100% { background-position: 220px 0, 0 180px; }
+  }
+}
+
+/*
+  左スポット光：朝焼けが自然に明るいので opacity を絞る。
+  白を重ねすぎると暖色の夜明けが死ぬ。0.68 が境界線。
+*/
+.read {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  background:
+    radial-gradient(860px 560px at 16% 42%,
+      rgba(255,255,255,0.80) 0%,
+      rgba(255,255,255,0.38) 46%,
+      rgba(255,255,255,0.08) 68%,
+      rgba(255,255,255,0.00) 84%
+    );
+  -webkit-mask-image: radial-gradient(980px 720px at 18% 44%, #000 58%, transparent 100%);
+  mask-image:         radial-gradient(980px 720px at 18% 44%, #000 58%, transparent 100%);
+  opacity: 0.68; /* 旧 0.84 → 朝焼けを殺さない値に下げた */
+}
+
+/* =========================
+   HEADER
+========================= */
+.header {
+  position: absolute;
+  inset: 0 0 auto 0;
+  z-index: 30;
+  padding-top:    calc(env(safe-area-inset-top, 0px) + 18px);
+  padding-bottom: 12px;
+}
+
+/* ヘッダー下のグラデ：ナビ文字の可読性確保 */
+.header::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 108px;
+  background: linear-gradient(180deg, rgba(6,14,24,0.40), rgba(6,14,24,0.00));
+  pointer-events: none;
+}
+
+.headerInner {
+  position: relative; /* ::before より前面に */
+  width: min(1840px, 100%);
+  margin: 0 auto;
+  padding: 18px clamp(18px, 3.8vw, 84px);
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: clamp(18px, 2.4vw, 40px);
+  border-bottom: 1px solid rgba(234,242,255,0.10);
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: rgba(234,242,255,0.96);
+}
+
+.logoMark {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(234,242,255,0.14);
+  background: linear-gradient(180deg, rgba(64,214,255,0.16), rgba(255,255,255,0.04));
+  font-weight: 800;
+}
+
+.logoText {
+  font-size: 15px;
+  letter-spacing: 0.10em;
+  font-weight: 650;
+}
+
+.nav {
+  display: flex;
+  justify-content: center;
+  gap: clamp(22px, 2.8vw, 48px);
+}
+
+.navLink {
+  position: relative;
+  text-decoration: none;
+  color: rgba(234,242,255,0.88);
+  font-size: 15px;
+  letter-spacing: 0.07em;
+  padding: 14px 2px;
+  white-space: nowrap;
+  transition: color 260ms ease;
+}
+
+.navLink::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0;
+  bottom: 7px;
+  height: 1px;
+  opacity: 0;
+  transform: scaleX(0.35);
+  transform-origin: left;
+  background: linear-gradient(90deg, rgba(64,214,255,0.80), rgba(234,242,255,0.00));
+  transition: transform 320ms var(--ease), opacity 240ms ease;
+}
+
+.navLink:hover { color: rgba(234,242,255,1); }
+.navLink:hover::after { opacity: 0.85; transform: scaleX(1); }
+
+.navLink:focus-visible {
+  outline: 2px solid rgba(64,214,255,0.65);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.headerCta {
+  text-decoration: none;
+  color: rgba(234,242,255,0.96);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  padding: 12px 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(64,214,255,0.30);
+  background: rgba(64,214,255,0.10);
+  white-space: nowrap;
+  transition: border-color 260ms ease, background 260ms ease;
+}
+
+.headerCta:hover { border-color: rgba(64,214,255,0.52); }
+.headerCta:focus-visible {
+  outline: 2px solid rgba(64,214,255,0.65);
+  outline-offset: 3px;
+  border-radius: 999px;
+}
+
+@media (max-width: 980px) {
+  .nav { display: none; }
+}
+
+/* =========================
+   CONTENT
+========================= */
+.wrap {
+  position: relative;
+  z-index: 20;
+  width: min(1720px, 100%);
+  margin: 0 auto;
+  padding:
+    calc(env(safe-area-inset-top, 0px) + 136px)
+    clamp(16px, 3.2vw, 64px)
+    72px;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: grid;
+  align-items: start;
+}
+
+.left { width: min(740px, 100%); }
+
+.copyStage {
+  position: relative;
+  padding-left: 20px;
+  color: rgba(8,14,22,0.92);
+}
+
+/* 縦の軸線 */
+.copyStage::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 6px; bottom: 6px;
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    rgba(64,214,255,0.00),
+    rgba(64,214,255,0.60),
+    rgba(64,214,255,0.00)
+  );
+  opacity: 0.9;
+}
+
+.statement { position: relative; }
+
+.meta { margin-top: clamp(18px, 5.8vh, 68px); }
+
+/* kicker row */
+.kickerRow {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+}
+
+.kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  font-weight: 700;
+  color: rgba(8,14,22,0.60);
+  text-transform: uppercase;
+}
+
+.kicker::before {
+  content: "";
+  width: 16px;
+  height: 1px;
+  background: rgba(64,214,255,0.72);
+  flex-shrink: 0;
+}
+
+.kickerSub {
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  font-weight: 600;
+  color: rgba(8,14,22,0.36);
+  text-transform: uppercase;
+}
+
+/* =========================
+   H1：2行で論理を殴る
+   1行目：事実の宣言
+   2行目：EXASの存在理由
+========================= */
+.title {
+  margin: 14px 0 0;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.18;
+  font-size: clamp(36px, 4.2vw, 66px);
+}
+
+.titleLine {
+  display: block;
+  opacity: 0;
+  transform: translateY(14px);
+
+  -webkit-mask-image: linear-gradient(90deg, #000 0 60%, transparent 78%);
+  mask-image:         linear-gradient(90deg, #000 0 60%, transparent 78%);
+  -webkit-mask-size: 220% 100%;
+  mask-size:         220% 100%;
+  -webkit-mask-position: 120% 0;
+  mask-position:         120% 0;
+
+  transition:
+    opacity              var(--dur) var(--ease),
+    transform            var(--dur) var(--ease),
+    -webkit-mask-position var(--dur) var(--ease),
+    mask-position        var(--dur) var(--ease);
+
+  /* 行ごとにずらして"文章が降ってくる"知覚を作る */
+  transition-delay: calc(130ms + (var(--i) * 130ms));
+}
+
+.lead {
+  margin: 0;
+  font-size: clamp(15px, 1.28vw, 17px);
+  line-height: 2.0;
+  color: rgba(8,14,22,0.66);
+  max-width: 52ch;
+}
+
+.scope {
+  margin-top: 14px;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: rgba(8,14,22,0.46);
+}
+
+/* CTA */
+.ctaRow {
+  margin-top: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 24px;
+}
+
+.ctaPrimary,
+.ctaSecondary {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  text-decoration: none;
+  padding-bottom: 6px;
+  letter-spacing: 0.04em;
+}
+
+.arrow { opacity: 0.7; transform: translateY(1px); }
+
+.ctaPrimary  { color: rgba(8,14,22,0.92); font-weight: 800; }
+.ctaSecondary{ color: rgba(8,14,22,0.68); font-weight: 700; }
+
+.ctaPrimary::after,
+.ctaSecondary::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 1px;
+  transform: scaleX(0.38);
+  transform-origin: left;
+  opacity: 0.65;
+  transition: transform 340ms var(--ease), opacity 340ms var(--ease);
+}
+
+.ctaPrimary::after {
+  background: linear-gradient(90deg, rgba(64,214,255,0.86), rgba(8,14,22,0.08));
+}
+
+.ctaSecondary::after {
+  background: linear-gradient(90deg, rgba(8,14,22,0.30), rgba(8,14,22,0.00));
+}
+
+.ctaPrimary:hover::after,
+.ctaSecondary:hover::after {
+  transform: scaleX(1);
+  opacity: 0.9;
+}
+
+.ctaPrimary:focus-visible,
+.ctaSecondary:focus-visible,
+.logo:focus-visible {
+  outline: 2px solid rgba(64,214,255,0.65);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* =========================
+   REVEAL
+========================= */
+.section :is(.headerInner, .statement, .meta) {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+
+.section .headerInner { transform: translateY(-10px); transition-delay: 40ms;  }
+.section .statement   {                               transition-delay: 110ms; }
+.section .meta        {                               transition-delay: 250ms; }
+
+.in :is(.headerInner, .statement, .meta) {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.in .titleLine {
+  opacity: 1;
+  transform: translateY(0);
+  -webkit-mask-position: 0% 0;
+  mask-position:         0% 0;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 760px) {
+  .kickerRow   { flex-direction: column; gap: 4px; }
+  .kickerSub   { display: none; } /* SP は left kicker だけ */
+  .meta        { margin-top: clamp(16px, 6vh, 56px); }
+}
+
+/* =========================
+   REDUCED MOTION
+========================= */
+@media (prefers-reduced-motion: reduce) {
+  .grid { animation: none !important; }
+
+  .section :is(.headerInner, .statement, .meta) {
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .titleLine {
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    -webkit-mask-image: none !important;
+    mask-image:         none !important;
+  }
+}
